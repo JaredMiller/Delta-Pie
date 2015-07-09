@@ -6,6 +6,7 @@ from numbers import Number
 from decimal import *
 from collections import deque
 import itertools
+from itertools import chain
 import csv
 
 # if we are in debug mode, make sure we are verbose with ssh logging too
@@ -40,6 +41,7 @@ def get_modded_rows(sql,degrees):
 	#first get the full dataset
 	currentRow = c.fetchone()
 
+
 	headerDone = False
 	with open('outFile.csv', 'w') as csvfile:
 		outcsv = csv.writer(csvfile, delimiter=',', quotechar='\"', quoting=csv.QUOTE_MINIMAL)
@@ -60,7 +62,7 @@ def get_modded_rows(sql,degrees):
 
 					#This is a hack, need to reorder this code to allow header generation earlier
 					if headerDone == False:
-						outcsv.writerow(map(lambda x : "{}_{}".format(x,len(q)),filteredNames))
+						outcsv.writerow(list(chain(*zip(filteredNames,map(lambda x : "{}_{}".format(x,len(q)),filteredNames)))))
 						headerDone = True
 					
 					#loop through each entry and add to the output file
@@ -70,11 +72,12 @@ def get_modded_rows(sql,degrees):
 					# 3. then extracts the sum next to the current row - zip(map(sum, zip(*q)), filteredRow)
 					# 4. next to getting the number we are on for refernce - enumerate(
 					# 5. It then loops through each one where we will calculate the change
-					outcsv.writerow([calc_per_change(a/len(q),b) for a,b in zip(map(sum, zip(*q)), filteredRow)])
+					r = list(chain(*zip(filteredRow,[calc_per_change(a/len(q),b) for a,b in zip(map(sum, zip(*q)), filteredRow)])))
+					outcsv.writerow(r)
 
 					#This is for debugging only	
 					#for i, (a,b) in enumerate(zip(map(sum, zip(*q)), filteredRow)):
-					#	print i, "sumed: ", a, "averaged: ", a/len(q), "current row:",  b, "Percent change: ", calc_per_change(a/len(q),b), "column name: ", filteredNames[i], "degree: ", len(q)
+						#print i, "sumed: ", a, "averaged: ", a/len(q), "current row:",  b, "Percent change: ", calc_per_change(a/len(q),b), "column name: ", filteredNames[i], "degree: ", len(q)
 
 				#add the row we just processed to the historical list for processing on next iteration		
 				q.append(filteredRow)
