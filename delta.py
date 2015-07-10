@@ -9,6 +9,7 @@ import itertools
 from itertools import chain
 import csv
 
+env = {}
 env["dbuser"] = "user"
 env["dbpass"] = "pass"
 env["dbhost"] = "host"
@@ -110,6 +111,6 @@ def process(sql, columns_of_record, degreeNums):
 	get_modded_rows(sql, columns_of_record, degs)
 
 #sample data below
-process('select * from your table order by date asc limit 10000', ['day_of_year'], ["2", "5", "10"])
+process("query", ['week'], ["2", "5", "10"])
 
 
